@@ -303,9 +303,11 @@ sub revoke_outgoing {
 sub update {
     my $self = shift;
     my $aws  = $self->aws;
-    local $aws->{error};  # so we can do a double-fetch
     my $result = $aws->update_security_group($self);
-    $self->refresh;
+    {
+	local $aws->{error};  # so we can do a double-fetch
+	$self->refresh;
+    }
     return $result;
 }
 
@@ -313,6 +315,7 @@ sub write { shift->update }
 
 sub refresh {
     my $self = shift;
+    local $self->aws->{raise_error} = 1;
     my $i    = $self->aws->describe_security_groups($self->groupId) or return;
     %$self   = %$i;
 }
