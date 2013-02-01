@@ -7135,7 +7135,59 @@ Amazon CloudWatch, create and update alarms and their states.
 The primary object manipulated by these methods is
 L<VM::EC2::CloudWatch>. Please see the L<VM::EC2::CloudWatch> manual page
 
+=head2 @metrics = $ec2->get_metric_statistics()
+
+=head2 @metrics = $ec2->list_metrics(-namespace  =>$namespace,
+                                     -metric_name=>$metric_name,
+                                     -statistics =>\@statistics,
+                                     -dimensions =>\%dimensions)
+
+Required arguments:
+
+  -namespace    scalar, name of the namespace the metric is belonged
+  -metric_name  scalar, metric name
+  -statistics   arrayref, one or more of statistics to be retrieved;
+                SampleCount, Average, Maximum, Minimum and Sum are allowed
+  -start_time   scalar, the start time from when the statistic data retrieved.
+                if ommitted, 1 hour before from '-end_time' is used
+  -end_time     scalar, the end time of the statistic data retrieve.
+                if ommitted, the current time is used
+  -period       period for statistic data aggregation. if ommitted, 60 seconds
+                will be used.
+
+Optional arguments:
+
+  -dimensions   hashref, each hash element consist of Dimension's Name and Value
+  -unit         scalar, the unit for the metric
+
+Returns a L<VM::EC2::CloudWatch> object which containing series of
+L<VM::EC2::CloudWatch::Datapoint> objects retrieved by the request.
+
 =cut
+
+sub get_metric_statistics {
+    my $self = shift;
+    my %args = @_;
+    
+    $args{-metric_name} or
+        croak "get_metric_statistics(): -metric_name argument missing";
+    $args{-namespace} or
+        croak "get_metric_statistics(): -namespace argument missing";
+    $args{-statistics} or
+        croak "get_metric_statistics(): -statistics argument missing";
+    
+    use constant MINUTE => 60;          # 60 seconds
+    use constant HOUR   => 60 * MINUTE;
+    $args{-period} ||= MINUTE;
+    $args{-start_time} ||= $self->timestamp_with_offset( - HOUR );
+    $args{-end_time}   ||= $self->timestamp;
+
+    my @params = map {$self->single_parm($_,\%args) } qw(Namespace MetricName StartTime EndTime Period Unit);
+    push @params, $self->member_list_parm('Statistics',\%args);
+    push @params, $self->member_hash_parm('Dimensions',\%args,'Name','Value');
+    return $self->mon_call('GetMetricStatistics',@params);
+}
+
 
 # ------------------------------------------------------------------------------------------
 
