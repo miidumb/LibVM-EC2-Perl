@@ -7127,6 +7127,16 @@ sub resume_processes {
     return $self->asg_call('ResumeProcesses', @params);
 }
 
+=head1 Amazon CloudWatch
+
+The methods in this section allow you to retrieve information from
+Amazon CloudWatch, create and update alarms and their states.
+
+The primary object manipulated by these methods is
+L<VM::EC2::CloudWatch>. Please see the L<VM::EC2::CloudWatch> manual page
+
+=cut
+
 # ------------------------------------------------------------------------------------------
 
 =head1 INTERNAL METHODS
@@ -7227,6 +7237,29 @@ sub member_list_parm {
         my $c = 1;
         for (ref $a && ref $a eq 'ARRAY' ? @$a : $a) {
             push @params,("$argname.member.".$c++ => $_);
+        }
+    }
+    return @params;
+}
+
+=head2 @arguments = $ec2->member_hash_parm(ParameterName,\%args,$key_name,$value_name)
+
+=cut
+
+sub member_hash_parm {
+    my $self = shift;
+    my ($argname,$args,$key_name,$value_name) = @_;
+    my $name = $self->canonicalize($argname);
+    
+    my @params;
+    if (my $h = $args->{$name}||$args->{"-$argname"}) {
+        my $c = 1;
+        if (ref $h && ref $h eq 'HASH') {
+            while (my ($key, $value) = each %$h) {
+                push @params, ("$argname.member.$c.$key_name" => $key);
+                push @params, ("$argname.member.$c.$value_name" => $value) if $value; 
+                $c++;
+            }
         }
     }
     return @params;
@@ -7514,6 +7547,15 @@ sub timestamp {
     return strftime("%Y-%m-%dT%H:%M:%SZ",gmtime);
 }
 
+=head2 $ts = $ec2->timestamp_with_offset($offset_seconds)
+
+=cut
+
+sub timestamp_with_offset {
+    my $self            = shift;
+    my $offset_seconds  = shift;
+    return strftime("%Y-%m-%dT%H:%M:%SZ",gmtime(time + $offset_seconds));
+}
 
 =head2 $ua = $ec2->ua
 
@@ -7587,6 +7629,14 @@ sub asg_call {
     (my $endpoint = $self->{endpoint}) =~ s/ec2/autoscaling/;
     local $self->{endpoint} = $endpoint;
     local $self->{version}  = '2011-01-01';
+    $self->call(@_);
+}
+
+sub mon_call {
+    my $self = shift;
+    (my $endpoint = $self->{endpoint}) =~ s/ec2/monitoring/;
+    local $self->{endpoint} = $endpoint;
+    local $self->{version}  = '2010-08-01';
     $self->call(@_);
 }
 
