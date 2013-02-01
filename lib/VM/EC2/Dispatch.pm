@@ -295,6 +295,8 @@ use constant ObjectRegistration => {
     # auto scaling and launch controls
     DescribeLaunchConfigurations      => 'fetch_members,LaunchConfigurations,VM::EC2::LaunchConfiguration',
     DescribeAutoScalingGroups         => 'fetch_members,AutoScalingGroups,VM::EC2::ASG',
+    # CloudWatch
+    GetMetricStatistics               => 'fetch_one,GetMetricStatisticsResult,VM::EC2::CloudWatch',
 };
 
 sub new {
