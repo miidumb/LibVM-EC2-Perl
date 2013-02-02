@@ -2,13 +2,13 @@ package VM::EC2::CloudWatch::Datapoint;
 
 =head1 NAME
 
-VM::EC2::CloudWatch -- Object describing several Amazon CloudWatch responses
+VM::EC2::CloudWatch::Datapoint -- Object for each datapoint from GetMetricStatistics response
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
 
-This object represents several Amazon CloudWatch API responses.
+This object represents each datapoint retrieved by GetMetricStatistics API.
 
 =head1 METHODS
 
