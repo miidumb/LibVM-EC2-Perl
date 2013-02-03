@@ -7188,6 +7188,28 @@ sub get_metric_statistics {
     return $self->mon_call('GetMetricStatistics',@params);
 }
 
+=head2 @metrics = $ec2->list_metrics()
+
+=head2 @metrics = $ec2->list_metrics(-namespace  =>$namespace,
+                                     -metric_name=>$metric_name,
+                                     -dimensions =>\%dimensions)
+
+Optional arguments:
+
+  -namespace    scalar, name of the namespace the metric is belonged
+  -metric_name  scalar, metric name
+  -dimensions   hashref, each hash element consist of Dimension's Name and Value
+
+=cut
+
+sub list_metrics {
+    my $self = shift;
+    my %args = @_;
+
+    my @params = map {$self->single_parm($_,\%args) } qw(MetricName Namespace NextToken);
+    push @params, $self->member_hash_parm('Dimensions',\%args,'Name','Value');
+    return $self->mon_call('ListMetrics',@params);
+}
 
 # ------------------------------------------------------------------------------------------
 

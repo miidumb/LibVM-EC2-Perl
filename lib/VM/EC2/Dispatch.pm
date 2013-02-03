@@ -297,6 +297,7 @@ use constant ObjectRegistration => {
     DescribeAutoScalingGroups         => 'fetch_members,AutoScalingGroups,VM::EC2::ASG',
     # CloudWatch
     GetMetricStatistics               => 'fetch_one,GetMetricStatisticsResult,VM::EC2::CloudWatch',
+    ListMetrics                       => 'fetch_members,Metrics,VM::EC2::CloudWatch::Metric',
 };
 
 sub new {
